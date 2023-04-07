@@ -135,7 +135,6 @@ function ShinyCircle({ left, top, title, details, imgurl }: IContent) {
   useEffect(() => {
     document.addEventListener("click", handleClickOutside);
   });
-  console.log(parseInt(top), "이거 숫자로 나옴?");
   return (
     <Container
       style={{ left: left, top: top }}

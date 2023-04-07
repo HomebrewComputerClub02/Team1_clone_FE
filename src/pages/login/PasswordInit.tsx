@@ -1,9 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import logo from "../../assets/logo.png";
-import { sendEmail } from "../../apis/gql";
+
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { EMAIL } from "../../apis/gql";
+import { CHANGEPASSWORD, EMAIL, sendEmail } from "./../../apis/gql";
 
 const Wrapper = styled.div`
   margin: 0;
@@ -162,6 +162,9 @@ const Btn = styled.div`
   }
 `;
 
+// 수정사항 1
+// &.checked 전후로 pointer-events 추가
+// 클릭이 아예 안되게
 const BlueBtn = styled.div`
   box-sizing: border-box;
   width: 271px;
@@ -178,9 +181,10 @@ const BlueBtn = styled.div`
   position: relative;
   line-height: 100%;
   margin-bottom: 10px;
-  cursor: default;
+  pointer-events: none;
   opacity: 0.5;
   &.checked {
+    pointer-events: auto;
     cursor: pointer;
     opacity: 1;
     &:hover {
@@ -285,19 +289,34 @@ const Input = styled.input`
   }
 `;
 
+// 수정사항 2
+// buttonClicked state 추가
+
+// 수정사항 3
+// useQuery 안에 skip option 사용.
+// buttonClicked 가 false 일때는 실행안되게.
+// setEmail() 일어나는 onChange에는 setButtonClicked(false)
+// 인증버튼 눌렀을때만 setButtonClicked(true)
+
+// 수정사항4
+// 비밀번호 수정 api 작성완료
 function PasswordInit() {
   const [pw1, setPw1] = useState("");
   const [pw2, setPw2] = useState("");
-  const btn = useRef<any>([]);
   const [email, setEmail] = useState("");
+  const [buttonClicked, setButtonClicked] = useState(false);
+
+  const btn = useRef<any>([]);
   const cir = useRef<any>([]);
 
-  const [refetch, { loading, error }] = useLazyQuery(EMAIL, {
+  // 인증 확인
+  // const [check_validation, {}] = useLazyQuery(EMAIL);
+  const { refetch } = useQuery(EMAIL, {
     variables: { email },
+    skip: !buttonClicked,
   });
-  // const refetchE = (email: string) => {
-  //   refetch();
-  // };
+
+  // 이메일 보내기
   const [sendE, {}] = useMutation(sendEmail, { onError: () => {} });
   const sendFunction = async (email: any) => {
     const send_result = await sendE({
@@ -307,9 +326,24 @@ function PasswordInit() {
     });
     if (send_result.data) {
       console.log(send_result.data);
-      console.log();
     } else {
       const errors = send_result.errors;
+      console.log(errors);
+    }
+  };
+
+  const [changePw, {}] = useMutation(CHANGEPASSWORD, { onError: () => {} });
+  const changeFunction = async (email: string, password: string) => {
+    const change_result = await changePw({
+      variables: {
+        email,
+        password,
+      },
+    });
+    if (change_result.data) {
+      console.log(change_result.data);
+    } else {
+      const errors = change_result.errors;
       console.log(errors);
     }
   };
@@ -363,7 +397,7 @@ function PasswordInit() {
             ref={(e) => {
               cir.current[1] = e;
             }}
-            /* style={{ backgroundColor: "transparent", color: "#666" }} */
+            style={{ backgroundColor: "transparent", color: "#666" }}
           >
             2
           </CircleN>
@@ -376,6 +410,7 @@ function PasswordInit() {
             placeholder="이메일 주소"
             onChange={(e) => {
               setEmail(e.target.value);
+              if (buttonClicked) setButtonClicked(false);
               btn.current[0].classList.add("checked");
             }}
           ></Input>
@@ -420,8 +455,8 @@ function PasswordInit() {
               }}
               style={{ marginTop: "10px" }}
               onClick={async () => {
+                setButtonClicked(true);
                 const { data } = await refetch();
-                console.log("data : ", data);
                 if (data) {
                   if (data.completeEmailCheck === "true") {
                     console.log("인증완!!");
@@ -441,7 +476,7 @@ function PasswordInit() {
             ref={(e) => {
               cir.current[3] = e;
             }}
-            /* style={{ backgroundColor: "transparent", color: "#666" }} */
+            style={{ backgroundColor: "transparent", color: "#666" }}
           >
             4
           </CircleN>
@@ -472,10 +507,13 @@ function PasswordInit() {
                 btn.current[2] = e;
               }}
               style={{ width: "100%" }}
-              onClick={() => {
+              onClick={async () => {
                 if (pw1 !== pw2) {
                   alert("비밀번호가 일치하지 않습니다.");
                 } else {
+                  const res = await changeFunction(email, pw1);
+                  console.log("res : ", res);
+                  alert("변경 완료. 로그인해주셈");
                   window.location.href = "/";
                 }
               }}

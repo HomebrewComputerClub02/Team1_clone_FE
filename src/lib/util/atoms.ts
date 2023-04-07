@@ -16,3 +16,13 @@ export const fetchModelAtom = atom<FetchModel>({
   key: "fetchModel",
   default: {} as any,
 });
+
+export const likedOrNot = atom({
+  key: "likedOrNot",
+  default: false,
+});
+
+export const likeBtn = atom({
+  key: "likeBtn",
+  default: false,
+});

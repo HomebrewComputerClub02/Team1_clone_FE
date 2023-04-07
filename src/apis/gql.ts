@@ -1,4 +1,15 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client/core";
+
+export const SEARCH = gql`
+  query search($name: String!) {
+    search(searchInput: { name: $name }) {
+      name
+      description
+      category
+      img_src
+    }
+  }
+`;
 
 export const MODELS = gql`
   query {
@@ -75,5 +86,25 @@ export const SIGNUP = gql`
 export const sendEmail = gql`
   mutation sendEmail($email: String!) {
     sendEmail(email: $email)
+  }
+`;
+
+export const CHANGEPASSWORD = gql`
+  mutation resetPasswordByEmail($email: String!, $password: String!) {
+    resetPasswordByEmail(email: $email, password: $password)
+  }
+`;
+
+export const LIKEADD = gql`
+  mutation likeAdd($modelId: String!) {
+    likeAdd(modelId: $modelId)
+  }
+`;
+
+export const GETLIKES = gql`
+  query getLikesNum($modelId: String!, $userEmail: String!) {
+    getLikesNum(modelId: $modelId, userEmail: $userEmail) {
+      isLiked
+    }
   }
 `;

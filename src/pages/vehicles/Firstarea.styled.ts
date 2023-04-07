@@ -65,8 +65,10 @@ export const Arrow = styled.div`
 export const Heart = styled.div`
   position: absolute;
   width: 18px;
-  height: 16px;
-  background: url(https://www.hyundai.com/static/images/ico_btn.png);
-  background-position: -66px -134px;
+  height: 15px;
+  z-index: 1000;
+  color: red;
+  /* background: url(https://www.hyundai.com/static/images/ico_btn.png);
+  background-position: -66px -134px; */
   cursor: pointer;
 `;
